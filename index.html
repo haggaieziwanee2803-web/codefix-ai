@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CodeFix</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@900&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js"></script>
+<style>
+  :root {
+    --bg: #06080d;
+    --panel: rgba(12, 16, 24, 0.82);
+    --border: #16324a;
+    --glow: #00e5c7;
+    --glow-soft: rgba(0, 229, 199, 0.25);
+    --text: #d8e6ea;
+    --text-dim: #6b8590;
+    --danger: #ff5c72;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 20% 0%, rgba(0,229,199,0.06), transparent 40%),
+      radial-gradient(circle at 80% 100%, rgba(122,92,255,0.08), transparent 40%);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+  }
+
+  .bg-watermark {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 0;
+    pointer-events: none;
+    user-select: none;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    line-height: 0.95;
+    text-align: center;
+  }
+
+  .bg-watermark::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 70vw;
+    height: 70vw;
+    max-width: 900px;
+    max-height: 900px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(122,92,255,0.22), transparent 62%);
+    filter: blur(24px);
+  }
+
+  .bg-watermark span {
+    position: relative;
+    display: block;
+    background: linear-gradient(180deg, #7df9ff 0%, #00e5c7 40%, #8a63ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-stroke: 2px rgba(125, 249, 255, 0.6);
+    filter:
+      drop-shadow(0 0 16px rgba(0, 229, 199, 0.6))
+      drop-shadow(0 0 60px rgba(138, 99, 255, 0.5));
+    opacity: 0.3;
+    letter-spacing: 0.05em;
+    animation: wmPulse 5s ease-in-out infinite;
+  }
+
+  .wm-top    { font-size: min(13vw, 190px); }
+  .wm-bottom { font-size: min(19vw, 280px); animation-delay: 1.2s; }
+
+  @keyframes wmPulse {
+    0%, 100% { opacity: 0.24; }
+    50%      { opacity: 0.42; }
+  }
+
+  header, main {
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(6, 8, 13, 0.6);
+    backdrop-filter: blur(8px);
+  }
+
+  .logo {
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--glow);
+    text-shadow: 0 0 12px var(--glow-soft);
+    letter-spacing: 2px;
+  }
+
+  nav { display: flex; gap: 10px; }
+
+  nav button {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  nav button.active,
+  nav button:not(:disabled):hover {
+    color: var(--glow);
+    border-color: var(--glow);
+    box-shadow: 0 0 10px var(--glow-soft);
+  }
+
+  nav button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  .hero { text-align: center; margin-bottom: 30px; }
+  .hero h1 { font-size: 26px; margin-bottom: 8px; }
+  .hero p { color: var(--text-dim); font-size: 14px; }
+
+  .mode-tabs, .view-toggle { display: flex; gap: 10px; margin-bottom: 20px; }
+
+  .mode-tab {
+    flex: 1;
+    padding: 14px;
+    background: rgba(12, 16, 24, 0.7);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 8px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .mode-tab.active {
+    color: var(--glow);
+    border-color: var(--glow);
+    box-shadow: 0 0 14px var(--glow-soft);
+  }
+
+  .view-toggle-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+  }
+
+  .view-toggle-btn.active {
+    color: var(--glow);
+    border-color: var(--glow);
+    box-shadow: 0 0 8px var(--glow-soft);
+  }
+
+  .panel {
+    background: var(--panel);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 24px rgba(0,229,199,0.05);
+  }
+
+  .panel-label {
+    font-size: 12px;
+    color: var(--glow);
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+
+  textarea, select, input[type="number"] {
+    width: 100%;
+    background: rgba(5, 7, 9, 0.9);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 12px;
+    border-radius: 6px;
+    resize: vertical;
+  }
+
+  textarea:focus, select:focus, input:focus {
+    outline: none;
+    border-color: var(--glow);
+    box-shadow: 0 0 10px var(--glow-soft);
+  }
+
+  #errorInput { min-height: 130px; }
+  #errorCodeInput { min-height: 100px; }
+  #codeOnlyInput { min-height: 240px; }
+
+  .row { margin-bottom: 16px; }
+
+  .analyze-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(90deg, #00e5c7, #00a3ff);
+    border: none;
+    border-radius: 8px;
+    color: #001014;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 0 18px var(--glow-soft);
+    transition: transform 0.15s;
+  }
+
+  .analyze-btn:hover { transform: translateY(-1px); }
+  .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .secondary-btn {
+    background: transparent;
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .secondary-btn:hover { box-shadow: 0 0 10px rgba(255,92,114,0.3); }
+
+  #loadingBox {
+    display: none;
+    color: var(--text-dim);
+    font-size: 13px;
+    line-height: 1.9;
+    margin-top: 14px;
+  }
+
+  #loadingBox .step { opacity: 0.3; }
+  #loadingBox .step.done { opacity: 1; color: var(--glow); }
+
+  #errorMsg { display: none; color: var(--danger); font-size: 13px; margin-top: 10px; }
+
+  .results { display: none; }
+
+  .result-block { margin-bottom: 18px; }
+
+  .result-block .label {
+    font-size: 12px;
+    color: var(--glow);
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+
+  .result-block .content { font-size: 13.5px; line-height: 1.6; }
+  .result-block ul { margin: 0; padding-left: 20px; font-size: 13.5px; line-height: 1.8; }
+
+  .error-type-tag, .lang-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
+
+  .error-type-tag {
+    background: rgba(255,92,114,0.1);
+    color: var(--danger);
+    border: 1px solid var(--danger);
+  }
+
+  .lang-tag {
+    background: rgba(0, 229, 199, 0.08);
+    color: var(--glow);
+    border: 1px solid var(--glow);
+    margin-left: 8px;
+  }
+
+  pre {
+    background: rgba(5, 7, 9, 0.9);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+    font-size: 13px;
+    overflow-x: auto;
+    margin: 0;
+  }
+
+  .copy-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  .copy-btn:hover { color: var(--glow); border-color: var(--glow); }
+
+  #diffView {
+    background: rgba(5, 7, 9, 0.9);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 12.5px;
+    overflow-x: auto;
+  }
+
+  .diff-line { white-space: pre; padding: 1px 6px; border-radius: 3px; }
+  .diff-added { background: rgba(0, 229, 199, 0.1); color: #7effc4; }
+  .diff-removed { background: rgba(255, 92, 114, 0.1); color: #ff8a99; text-decoration: line-through; opacity: 0.7; }
+  .diff-same { color: var(--text-dim); }
+
+  /* ---------- HISTORY ---------- */
+  .history-group-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin: 22px 0 10px;
+  }
+
+  .history-item {
+    background: var(--panel);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.15s;
+  }
+
+  .history-item:hover {
+    border-color: var(--glow);
+    box-shadow: 0 0 10px var(--glow-soft);
+  }
+
+  .history-item-title { font-size: 13.5px; font-weight: 700; }
+  .history-item-meta { font-size: 11.5px; color: var(--text-dim); margin-top: 4px; }
+  .history-item-tag {
+    font-size: 10px;
+    color: var(--glow);
+    border: 1px solid var(--glow);
+    padding: 2px 8px;
+    border-radius: 12px;
+  }
+
+  .empty-state {
+    text-align: center;
+    color: var(--text-dim);
+    padding: 40px 20px;
+    font-size: 13px;
+  }
+
+  /* ---------- SETTINGS ---------- */
+  .settings-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .settings-row:last-child { border-bottom: none; }
+
+  .settings-row-label { font-size: 13.5px; }
+  .settings-row-sub { font-size: 11.5px; color: var(--text-dim); margin-top: 3px; }
+
+  .settings-row select, .settings-row input {
+    width: 160px;
+  }
+
+  .contact-link {
+    display: block;
+    color: var(--glow);
+    text-decoration: none;
+    font-size: 13px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .contact-link:last-child { border-bottom: none; }
+
+  .terms-text {
+    font-size: 12.5px;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-watermark">
+  <span class="wm-top">BLOODY</span>
+  <span class="wm-bottom">TECH</span>
+</div>
+
+<header>
+  <div class="logo">⚡ CODEFIX</div>
+  <nav>
+    <button class="nav-btn active" data-view="newfix">New Fix</button>
+    <button class="nav-btn" data-view="history">History</button>
+    <button class="nav-btn" data-view="settings">Settings</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ========== NEW FIX VIEW ========== -->
+  <div class="view" id="view-newfix">
+    <div class="hero">
+      <h1>Fix your code. Understand why.</h1>
+      <p>Paste an error to understand it, or paste broken code to repair it.</p>
+    </div>
+
+    <div class="mode-tabs">
+      <button class="mode-tab active" data-mode="error">🐞 ERROR FIX</button>
+      <button class="mode-tab" data-mode="code">🧩 CODE FIX</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">▍ LANGUAGE</div>
+      <div class="row">
+        <select id="languageSelect">
+          <option value="auto">🔍 Auto-detect</option>
+          <option>Python</option>
+          <option>JavaScript</option>
+          <option>TypeScript</option>
+          <option>Java</option>
+          <option>C++</option>
+          <option>C#</option>
+          <option>PHP</option>
+          <option>HTML/CSS</option>
+          <option>SQL</option>
+          <option>Go</option>
+          <option>Rust</option>
+        </select>
+      </div>
+
+      <div id="errorMode">
+        <div class="panel-label">▍ ERROR</div>
+        <div class="row">
+          <textarea id="errorInput" placeholder="Paste your traceback / error here..."></textarea>
+        </div>
+        <div class="panel-label">▍ CODE (optional)</div>
+        <div class="row">
+          <textarea id="errorCodeInput" placeholder="Paste the relevant code here for a more accurate fix..."></textarea>
+        </div>
+        <button class="analyze-btn" id="analyzeBtn">🔧 ANALYZE ERROR</button>
+      </div>
+
+      <div id="codeMode" style="display:none;">
+        <div class="panel-label">▍ YOUR CODE</div>
+        <div class="row">
+          <textarea id="codeOnlyInput" placeholder="Paste your broken or messy code here..."></textarea>
+        </div>
+        <button class="analyze-btn" id="fixCodeBtn">🧩 FIX MY CODE</button>
+      </div>
+
+      <div id="loadingBox"></div>
+      <div id="errorMsg"></div>
+    </div>
+
+    <div class="results" id="errorResults">
+      <div class="panel">
+        <span class="error-type-tag" id="errorTypeTag"></span>
+        <span class="lang-tag" id="detectedLangTag"></span>
+        <div class="result-block">
+          <div class="label">📍 WHERE</div>
+          <div class="content" id="locationText"></div>
+        </div>
+        <div class="result-block">
+          <div class="label">💡 IN SIMPLE TERMS</div>
+          <div class="content" id="simpleSummary"></div>
+        </div>
+        <div class="result-block">
+          <div class="label">🔍 WHAT HAPPENED</div>
+          <div class="content" id="whatHappened"></div>
+        </div>
+        <div class="result-block">
+          <div class="label">🧠 WHY</div>
+          <div class="content" id="whyText"></div>
+        </div>
+        <div class="result-block">
+          <div class="label">✅ SUGGESTED FIX</div>
+          <div class="content" id="fixExplanation"></div>
+        </div>
+        <div class="result-block" id="fixedCodeBlock" style="display:none;">
+          <pre><code id="fixedCode" class="language-python"></code></pre>
+          <button class="copy-btn" id="copyBtn">📋 Copy Fix</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="results" id="codeResults">
+      <div class="panel">
+        <span class="lang-tag" id="codeDetectedLangTag"></span>
+        <div id="verifiedBadge" style="margin-bottom:14px;"></div>
+        <div class="result-block">
+          <div class="label">💡 SUMMARY</div>
+          <div class="content" id="codeSummary"></div>
+        </div>
+        <div class="result-block" id="changesBlock">
+          <div class="label">🛠️ WHAT WAS FIXED</div>
+          <ul id="changesList"></ul>
+        </div>
+        <div class="result-block">
+          <div class="view-toggle">
+            <button class="view-toggle-btn active" data-view="code">✅ CORRECTED CODE</button>
+            <button class="view-toggle-btn" data-view="diff">🔀 SHOW DIFF</button>
+          </div>
+          <pre id="codeView"><code id="correctedCode" class="language-python"></code></pre>
+          <div id="diffView" style="display:none;"></div>
+          <button class="copy-btn" id="copyCodeBtn">📋 Copy Code</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== HISTORY VIEW ========== -->
+  <div class="view" id="view-history" style="display:none;">
+    <div class="hero">
+      <h1>History</h1>
+      <p>Every fix you've run, saved right here in your browser.</p>
+    </div>
+    <div id="historyContent"></div>
+  </div>
+
+  <!-- ========== HISTORY DETAIL VIEW ========== -->
+  <div class="view" id="view-historyDetail" style="display:none;">
+    <button class="view-toggle-btn" id="backToHistoryBtn" style="margin-bottom:20px;">← Back to History</button>
+    <div id="historyDetailContent"></div>
+  </div>
+
+  <!-- ========== SETTINGS VIEW ========== -->
+  <div class="view" id="view-settings" style="display:none;">
+    <div class="hero">
+      <h1>Settings</h1>
+      <p>Configure CodeFix to work the way you want.</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">▍ PREFERENCES</div>
+
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Default language</div>
+          <div class="settings-row-sub">What "New Fix" starts on</div>
+        </div>
+        <select id="settingDefaultLanguage">
+          <option value="auto">🔍 Auto-detect</option>
+          <option>Python</option>
+          <option>JavaScript</option>
+          <option>TypeScript</option>
+          <option>Java</option>
+          <option>C++</option>
+          <option>C#</option>
+          <option>PHP</option>
+          <option>HTML/CSS</option>
+          <option>SQL</option>
+          <option>Go</option>
+          <option>Rust</option>
+        </select>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Theme</div>
+          <div class="settings-row-sub">CodeFix's signature look</div>
+        </div>
+        <div class="settings-row-label" style="color: var(--glow);">Neon Dark</div>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">History limit</div>
+          <div class="settings-row-sub">Oldest entries drop off after this many</div>
+        </div>
+        <select id="settingHistoryLimit">
+          <option value="10">10 entries</option>
+          <option value="25">25 entries</option>
+          <option value="50" selected>50 entries</option>
+          <option value="100">100 entries</option>
+        </select>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Auto-delete history</div>
+          <div class="settings-row-sub">Automatically remove entries older than this</div>
+        </div>
+        <select id="settingAutoDelete">
+          <option value="7">7 days</option>
+          <option value="30" selected>30 days</option>
+          <option value="never">Never</option>
+        </select>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Clear all history</div>
+          <div class="settings-row-sub">This cannot be undone</div>
+        </div>
+        <button class="secondary-btn" id="clearHistoryBtn">🗑️ Clear</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">▍ CONTACT SUPPORT</div>
+      <a class="contact-link" id="telegramLink" href="#" target="_blank">💬 Telegram — @Tag_yo_momma</a>
+      <a class="contact-link" id="whatsappLink" href="#" target="_blank">📱 WhatsApp — Message support</a>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">▍ TERMS OF USE</div>
+      <p class="terms-text">
+        CodeFix analyzes code and errors you submit using an AI model to provide explanations and suggested fixes.
+        Suggested fixes are generated automatically and may not always be correct — always review code before using
+        it in production. Your error/code submissions are sent to a third-party AI provider for processing and are
+        not stored on any server; history is saved only in your own browser. By using CodeFix you agree not to
+        submit malicious code, sensitive credentials, or content that violates applicable law. CodeFix is provided
+        "as is" with no warranty of any kind.
+      </p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">▍ ABOUT</div>
+      <div class="settings-row">
+        <div class="settings-row-label">App version</div>
+        <div class="settings-row-label" style="color: var(--text-dim);">v1.0.0</div>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-label">Built by</div>
+        <div class="settings-row-label" style="color: var(--text-dim);">Bloody Tech</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const API_BASE = "http://127.0.0.1:8000";
+const HISTORY_KEY = "codefix_history";
+const SETTINGS_KEY = "codefix_settings";
+const TELEGRAM_ID = "8595219553";
+const WHATSAPP_NUMBER = "2349026556610";
+
+/* ============================================================
+   SETTINGS
+============================================================ */
+function loadSettings() {
+  const raw = localStorage.getItem(SETTINGS_KEY);
+  const defaults = { defaultLanguage: "auto", historyLimit: 50, autoDelete: "30" };
+  if (!raw) return defaults;
+  try { return { ...defaults, ...JSON.parse(raw) }; }
+  catch { return defaults; }
+}
+
+function saveSettings(settings) {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+}
+
+function applySettingsToForm() {
+  const settings = loadSettings();
+  document.getElementById("settingDefaultLanguage").value = settings.defaultLanguage;
+  document.getElementById("settingHistoryLimit").value = String(settings.historyLimit);
+  document.getElementById("settingAutoDelete").value = String(settings.autoDelete);
+  document.getElementById("languageSelect").value = settings.defaultLanguage;
+}
+
+document.getElementById("settingDefaultLanguage").addEventListener("change", (e) => {
+  const settings = loadSettings();
+  settings.defaultLanguage = e.target.value;
+  saveSettings(settings);
+});
+
+document.getElementById("settingHistoryLimit").addEventListener("change", (e) => {
+  const settings = loadSettings();
+  settings.historyLimit = parseInt(e.target.value, 10);
+  saveSettings(settings);
+  enforceHistoryLimit();
+});
+
+document.getElementById("settingAutoDelete").addEventListener("change", (e) => {
+  const settings = loadSettings();
+  settings.autoDelete = e.target.value;
+  saveSettings(settings);
+  applyAutoDelete();
+});
+
+document.getElementById("clearHistoryBtn").addEventListener("click", () => {
+  if (confirm("Clear all saved history? This cannot be undone.")) {
+    localStorage.removeItem(HISTORY_KEY);
+    renderHistoryList();
+  }
+});
+
+document.getElementById("telegramLink").href = `tg://user?id=${TELEGRAM_ID}`;
+document.getElementById("whatsappLink").href = `https://wa.me/${WHATSAPP_NUMBER}`;
+
+/* ============================================================
+   HISTORY STORAGE
+============================================================ */
+function loadHistory() {
+  const raw = localStorage.getItem(HISTORY_KEY);
+  if (!raw) return [];
+  try { return JSON.parse(raw); }
+  catch { return []; }
+}
+
+function saveHistory(entries) {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(entries));
+}
+
+function enforceHistoryLimit() {
+  const settings = loadSettings();
+  let entries = loadHistory();
+  if (entries.length > settings.historyLimit) {
+    entries = entries.slice(0, settings.historyLimit);
+    saveHistory(entries);
+  }
+}
+
+function applyAutoDelete() {
+  const settings = loadSettings();
+  if (settings.autoDelete === "never") return;
+
+  const maxAgeMs = parseInt(settings.autoDelete, 10) * 24 * 60 * 60 * 1000;
+  const cutoff = Date.now() - maxAgeMs;
+  const entries = loadHistory().filter(e => e.timestamp >= cutoff);
+  saveHistory(entries);
+}
+
+function addHistoryEntry(entry) {
+  const entries = loadHistory();
+  entries.unshift(entry);
+  saveHistory(entries);
+  enforceHistoryLimit();
+}
+
+/* ============================================================
+   HISTORY RENDERING
+============================================================ */
+function formatRelativeTime(timestamp) {
+  const diffMs = Date.now() - timestamp;
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins} minute${mins === 1 ? "" : "s"} ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} day${days === 1 ? "" : "s"} ago`;
+}
+
+function groupLabel(timestamp) {
+  const now = new Date();
+  const date = new Date(timestamp);
+  const isToday = date.toDateString() === now.toDateString();
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday = date.toDateString() === yesterday.toDateString();
+
+  if (isToday) return "Today";
+  if (isYesterday) return "Yesterday";
+  return date.toLocaleDateString(undefined, { month: "long", day: "numeric" });
+}
+
+function renderHistoryList() {
+  applyAutoDelete();
+  const entries = loadHistory();
+  const container = document.getElementById("historyContent");
+
+  if (entries.length === 0) {
+    container.innerHTML = '<div class="empty-state">No history yet — run an analysis or fix to see it here.</div>';
+    return;
+  }
+
+  let html = "";
+  let lastGroup = null;
+
+  entries.forEach(entry => {
+    const group = groupLabel(entry.timestamp);
+    if (group !== lastGroup) {
+      html += `<div class="history-group-label">${group}</div>`;
+      lastGroup = group;
+    }
+
+    html += `
+      <div class="history-item" data-id="${entry.id}">
+        <div>
+          <div class="history-item-title">${entry.title}</div>
+          <div class="history-item-meta">${entry.language} · ${formatRelativeTime(entry.timestamp)}</div>
+        </div>
+        <div class="history-item-tag">${entry.mode === "error" ? "Error Fix" : "Code Fix"}</div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+
+  container.querySelectorAll(".history-item").forEach(item => {
+    item.addEventListener("click", () => {
+      const id = item.dataset.id;
+      const entry = loadHistory().find(e => e.id === id);
+      if (entry) openHistoryDetail(entry);
+    });
+  });
+}
+
+function openHistoryDetail(entry) {
+  const container = document.getElementById("historyDetailContent");
+
+  if (entry.mode === "error") {
+    const data = entry.result;
+    container.innerHTML = `
+      <div class="panel">
+        <span class="error-type-tag">❌ ${data.error_type}</span>
+        <span class="lang-tag">🔤 ${entry.language}</span>
+        <div class="result-block"><div class="label">📍 WHERE</div><div class="content">${data.location || "Not specified"}</div></div>
+        <div class="result-block"><div class="label">💡 IN SIMPLE TERMS</div><div class="content">${data.simple_summary}</div></div>
+        <div class="result-block"><div class="label">🔍 WHAT HAPPENED</div><div class="content">${data.what_happened}</div></div>
+        <div class="result-block"><div class="label">🧠 WHY</div><div class="content">${data.why}</div></div>
+        <div class="result-block"><div class="label">✅ SUGGESTED FIX</div><div class="content">${data.fix_explanation}</div></div>
+        ${data.fixed_code ? `<div class="result-block"><pre><code class="language-${(entry.language || "python").toLowerCase()}">${escapeHtml(data.fixed_code)}</code></pre></div>` : ""}
+      </div>
+    `;
+  } else {
+    const data = entry.result;
+    const changesHtml = (data.changes || []).map(c => `<li>${c}</li>`).join("");
+    container.innerHTML = `
+      <div class="panel">
+        <span class="lang-tag">🔤 ${entry.language}</span>
+        <div class="result-block"><div class="label">💡 SUMMARY</div><div class="content">${data.summary}</div></div>
+        ${changesHtml ? `<div class="result-block"><div class="label">🛠️ WHAT WAS FIXED</div><ul>${changesHtml}</ul></div>` : ""}
+        <div class="result-block"><div class="label">✅ CORRECTED CODE</div><pre><code class="language-${(entry.language || "python").toLowerCase()}">${escapeHtml(data.fixed_code)}</code></pre></div>
+      </div>
+    `;
+  }
+
+  document.querySelectorAll("pre code").forEach(block => Prism.highlightElement(block));
+
+  switchView("historyDetail");
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+document.getElementById("backToHistoryBtn").addEventListener("click", () => switchView("history"));
+
+/* ============================================================
+   TOP-LEVEL VIEW SWITCHING
+============================================================ */
+function switchView(viewName) {
+  document.querySelectorAll(".view").forEach(v => v.style.display = "none");
+  document.getElementById("view-" + viewName).style.display = "block";
+
+  document.querySelectorAll(".nav-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.view === viewName);
+  });
+
+  if (viewName === "history") renderHistoryList();
+  if (viewName === "settings") applySettingsToForm();
+}
+
+document.querySelectorAll(".nav-btn").forEach(btn => {
+  btn.addEventListener("click", () => switchView(btn.dataset.view));
+});
+
+/* ============================================================
+   MODE / VIEW TOGGLES (New Fix screen)
+============================================================ */
+const loadingBox = document.getElementById("loadingBox");
+const errorMsg = document.getElementById("errorMsg");
+const errorResults = document.getElementById("errorResults");
+const codeResults = document.getElementById("codeResults");
+const analyzeBtn = document.getElementById("analyzeBtn");
+const fixCodeBtn = document.getElementById("fixCodeBtn");
+
+function hideResults() {
+  errorResults.style.display = "none";
+  codeResults.style.display = "none";
+  errorMsg.style.display = "none";
+}
+
+function showError(message) {
+  errorMsg.textContent = message;
+  errorMsg.style.display = "block";
+}
+
+async function postJson(path, body) {
+  const response = await fetch(API_BASE + path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if (!response.ok) throw new Error("Server error: " + response.status);
+  return response.json();
+}
+
+async function runSteps(labels) {
+  loadingBox.innerHTML = labels.map(label => `<div class="step">✓ ${label}</div>`).join("");
+  loadingBox.style.display = "block";
+  const steps = loadingBox.querySelectorAll(".step");
+  for (const step of steps) {
+    await new Promise(r => setTimeout(r, 350));
+    step.classList.add("done");
+  }
+}
+
+function bindCopy(buttonId, sourceId) {
+  document.getElementById(buttonId).addEventListener("click", () => {
+    navigator.clipboard.writeText(document.getElementById(sourceId).textContent);
+    const btn = document.getElementById(buttonId);
+    const original = btn.textContent;
+    btn.textContent = "✅ Copied!";
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  });
+}
+
+function languageToPrismClass(language) {
+  const map = {
+    "Python": "language-python", "JavaScript": "language-javascript",
+    "TypeScript": "language-typescript", "Java": "language-java",
+    "C++": "language-cpp", "C#": "language-csharp", "PHP": "language-php",
+    "HTML/CSS": "language-markup", "SQL": "language-sql",
+    "Go": "language-go", "Rust": "language-rust"
+  };
+  return map[language] || "language-python";
+}
+
+function highlightCodeBlock(elementId, code, language) {
+  const el = document.getElementById(elementId);
+  el.className = languageToPrismClass(language);
+  el.textContent = code;
+  Prism.highlightElement(el);
+}
+
+document.querySelectorAll(".mode-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    const mode = tab.dataset.mode;
+    document.querySelectorAll(".mode-tab").forEach(t => t.classList.toggle("active", t === tab));
+    document.getElementById("errorMode").style.display = mode === "error" ? "block" : "none";
+    document.getElementById("codeMode").style.display = mode === "code" ? "block" : "none";
+    loadingBox.style.display = "none";
+    hideResults();
+  });
+});
+
+document.querySelectorAll(".view-toggle-btn[data-view]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".view-toggle-btn[data-view]").forEach(b => b.classList.toggle("active", b === btn));
+    const view = btn.dataset.view;
+    document.getElementById("codeView").style.display = view === "code" ? "block" : "none";
+    document.getElementById("diffView").style.display = view === "diff" ? "block" : "none";
+    if (view === "diff") {
+      const fixed = document.getElementById("correctedCode").textContent;
+      renderDiff(window.__lastOriginalCode || "", fixed);
+    }
+  });
+});
+
+function renderDiff(originalText, fixedText) {
+  const originalLines = originalText.split("\n");
+  const fixedLines = fixedText.split("\n");
+  const m = originalLines.length;
+  const n = fixedLines.length;
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+
+  for (let i = m - 1; i >= 0; i--) {
+    for (let j = n - 1; j >= 0; j--) {
+      if (originalLines[i] === fixedLines[j]) dp[i][j] = dp[i + 1][j + 1] + 1;
+      else dp[i][j] = Math.max(dp[i + 1][j], dp[i][j + 1]);
+    }
+  }
+
+  let i = 0, j = 0;
+  const rows = [];
+
+  while (i < m && j < n) {
+    if (originalLines[i] === fixedLines[j]) { rows.push({ type: "same", text: originalLines[i] }); i++; j++; }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) { rows.push({ type: "removed", text: originalLines[i] }); i++; }
+    else { rows.push({ type: "added", text: fixedLines[j] }); j++; }
+  }
+  while (i < m) { rows.push({ type: "removed", text: originalLines[i] }); i++; }
+  while (j < n) { rows.push({ type: "added", text: fixedLines[j] }); j++; }
+
+  const container = document.getElementById("diffView");
+  container.innerHTML = "";
+  rows.forEach(row => {
+    const line = document.createElement("div");
+    line.className = "diff-line diff-" + row.type;
+    const marker = row.type === "added" ? "+ " : row.type === "removed" ? "- " : "  ";
+    line.textContent = marker + row.text;
+    container.appendChild(line);
+  });
+}
+
+/* ============================================================
+   ERROR FIX
+============================================================ */
+analyzeBtn.addEventListener("click", async () => {
+  const errorText = document.getElementById("errorInput").value.trim();
+  const codeText = document.getElementById("errorCodeInput").value.trim();
+  const language = document.getElementById("languageSelect").value;
+
+  hideResults();
+  if (!errorText) { showError("Please paste an error first."); return; }
+
+  analyzeBtn.disabled = true;
+  const stepsPromise = runSteps(["Reading error", "Identifying error type", "Finding likely cause", "Preparing fix"]);
+
+  try {
+    const data = await postJson("/analyze", { error_text: errorText, code_text: codeText || null, language });
+    await stepsPromise;
+
+    const detected = data.detected_language || language;
+
+    document.getElementById("errorTypeTag").textContent = "❌ " + data.error_type;
+    document.getElementById("detectedLangTag").textContent = "🔤 " + detected;
+    document.getElementById("locationText").textContent = data.location || "Not specified";
+    document.getElementById("simpleSummary").textContent = data.simple_summary;
+    document.getElementById("whatHappened").textContent = data.what_happened;
+    document.getElementById("whyText").textContent = data.why;
+    document.getElementById("fixExplanation").textContent = data.fix_explanation;
+
+    const fixedCodeBlock = document.getElementById("fixedCodeBlock");
+    if (data.fixed_code) {
+      highlightCodeBlock("fixedCode", data.fixed_code, detected);
+      fixedCodeBlock.style.display = "block";
+    } else {
+      fixedCodeBlock.style.display = "none";
+    }
+
+    errorResults.style.display = "block";
+
+    addHistoryEntry({
+      id: String(Date.now()) + Math.random().toString(36).slice(2, 7),
+      timestamp: Date.now(),
+      mode: "error",
+      language: detected,
+      title: data.error_type || "Error Fix",
+      result: data
+    });
+
+  } catch (error) {
+    showError("Something went wrong: " + error.message);
+  } finally {
+    analyzeBtn.disabled = false;
+    loadingBox.style.display = "none";
+  }
+});
+
+/* ============================================================
+   CODE FIX
+============================================================ */
+fixCodeBtn.addEventListener("click", async () => {
+  const codeText = document.getElementById("codeOnlyInput").value;
+  const language = document.getElementById("languageSelect").value;
+
+  window.__lastOriginalCode = codeText;
+  hideResults();
+  if (!codeText.trim()) { showError("Please paste some code first."); return; }
+
+  fixCodeBtn.disabled = true;
+  const stepsPromise = runSteps(["Scanning your code", "Checking indentation and syntax", "Repairing problems", "Preparing corrected version"]);
+
+  try {
+    const data = await postJson("/fix-code", { code_text: codeText, language });
+    await stepsPromise;
+
+    const detected = data.detected_language || language;
+
+    document.getElementById("codeDetectedLangTag").textContent = "🔤 " + detected;
+
+    const verifiedBadge = document.getElementById("verifiedBadge");
+    if (data.verified === true) {
+      verifiedBadge.innerHTML = '<span style="color:#00e5c7;font-size:12px;">✅ Syntax verified</span>';
+    } else if (data.verified === false) {
+      verifiedBadge.innerHTML = '<span style="color:#ff5c72;font-size:12px;">⚠️ Could not fully verify — review before use</span>';
+    } else {
+      verifiedBadge.innerHTML = '';
+    }
+
+    document.getElementById("codeSummary").textContent = data.summary;
+
+    const changesList = document.getElementById("changesList");
+    changesList.innerHTML = "";
+    (data.changes || []).forEach(change => {
+      const item = document.createElement("li");
+      item.textContent = change;
+      changesList.appendChild(item);
+    });
+    document.getElementById("changesBlock").style.display = (data.changes && data.changes.length) ? "block" : "none";
+
+    document.getElementById("codeView").style.display = "block";
+    document.getElementById("diffView").style.display = "none";
+    document.querySelectorAll(".view-toggle-btn[data-view]").forEach(b => b.classList.toggle("active", b.dataset.view === "code"));
+
+    highlightCodeBlock("correctedCode", data.fixed_code, detected);
+
+    codeResults.style.display = "block";
+
+    addHistoryEntry({
+      id: String(Date.now()) + Math.random().toString(36).slice(2, 7),
+      timestamp: Date.now(),
+      mode: "code",
+      language: detected,
+      title: "Code Fix",
+      result: data,
+      originalCode: codeText
+    });
+
+  } catch (error) {
+    showError("Something went wrong: " + error.message);
+  } finally {
+    fixCodeBtn.disabled = false;
+    loadingBox.style.display = "none";
+  }
+});
+
+bindCopy("copyBtn", "fixedCode");
+bindCopy("copyCodeBtn", "correctedCode");
+
+/* ============================================================
+   INIT
+============================================================ */
+applySettingsToForm();
+applyAutoDelete();
+</script>
+
+</body>
+</html>
