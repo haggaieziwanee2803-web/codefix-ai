@@ -2,7 +2,10 @@
 # main.py
 # CodeFix — FastAPI backend
 # ============================================================
+import logging
 
+logger = logging.getLogger("codefix")
+logging.basicConfig(level=logging.INFO)
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -45,6 +48,7 @@ def analyze(request: AnalyzeRequest):
             language=request.language
         )
     except Exception as error:
+        logger.exception("Analysis failed")
         raise HTTPException(
             status_code=500,
             detail=f"Analysis failed: {error}"
@@ -59,10 +63,13 @@ def fix_code_endpoint(request: FixCodeRequest):
             language=request.language
         )
     except Exception as error:
+        logger.exception("Code fix failed")
         raise HTTPException(
             status_code=500,
             detail=f"Code fix failed: {error}"
         )
+
+
 @app.get("/app")
 def serve_frontend():
     return FileResponse("index.html")
